@@ -1,186 +1,63 @@
-// import React, { useState } from "react";
-// import LoginLeftSide from "./LoginLeftSide";
-// import {Link} from 'react-router-dom'
-// import {
-//   ArrowLeftIcon,
-//   EyeIcon,
-//   EyeSlashIcon,
-// } from "@heroicons/react/24/outline";
-
-// const LoginForm = ({ role, title, subtitle }) => {
-// from
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [showPassword, setShowPassword] = useState(false);
-//   const [error, setError] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setError("");
-//     setLoading(false);
-// };
-
-//   return (
-//     <div className="min-h-screen flex flex-col md:flex-row">
-//       <LoginLeftSide />
-
-//       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-white ">
-//         <div className="w-full max-w-md animate-fade-in ">
-//         <Link to='/login' className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-700 ntext-sm mb-10 transition-colors">
-//         <ArrowLeftIcon className="w-4 h-4" /> Back to portals
-//         </Link>
-//         <div className="mb-8">
-//           <h1 className="text-2xl sm:text-3xl font-medium text-zinc-800">{title}</h1>
-//           <p className="text-slate-500 text-sm sm:text-base mt-2">{subtitle}</p>
-//         </div>
-
-//           {error && (
-//             <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-x1 flrx items-center gap-3">
-//               <div className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0"/>
-//               {error}
-//             </div>
-//           )}
-
-//           <form className="space-y-5" onSubmit={handleSubmit}>
-//             <div>
-//               <label className="block text-sm font-medium text-slate-700 mb-2">Email address</label>
-//               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="john.doe@example.com"/>
-//             </div>
-//             <div>
-//               <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
-//               <div className="relative">
-//                 <input type={showPassword ? "text" : "password"}  onChange={(e) => setPassword(e.target.value)} required className="pr-11" placeholder="......."/>
-//                 <button type="button" className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" onClick={() => setShowPassword(!showPassword)}>
-//                   {showPassword ? <EyeSlashIcon size={18}/> : <EyeIcon size={18}/> }
-//                 </button>
-//               </div>
-              
-//             </div>
-//           </form>
-//       </div>
-//       </div>
-
-      
-//     </div>
-//   )
-// }
-
-// export default LoginForm; 
-
-import React, { useState } from "react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import LoginLeftSide from "./LoginLeftSide";
-import { Link } from "react-router-dom";
-import {
-  ArrowLeftIcon,
-  EyeIcon,
-  EyeSlashIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "../context/AuthContext";
 
 const LoginForm = ({ role, title, subtitle }) => {
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    // Login logic
-
-    setLoading(false);
+  const onSubmit = async (data) => {
+    try {
+      await login(data.email, data.password, role);
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Login failed");
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <LoginLeftSide />
-
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-white">
         <div className="w-full max-w-md animate-fade-in">
-
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-700 text-sm mb-10 transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Back to portals
+          <Link to="/login" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-700 text-sm mb-10 transition-colors">
+            <ArrowLeftIcon className="w-4 h-4" /> Back to portals
           </Link>
-
           <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-medium text-zinc-800">
-              {title}
-            </h1>
-            <p className="text-slate-500 text-sm sm:text-base mt-2">
-              {subtitle}
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-medium text-zinc-800">{title}</h1>
+            <p className="text-slate-500 text-sm sm:text-base mt-2">{subtitle}</p>
           </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-xl flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-              {error}
-            </div>
-          )}
-
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Email address
-              </label>
-
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="john.doe@example.com"
-                className="w-full border rounded-lg px-3 py-2"
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email address</label>
+              <input type="email" {...register("email", { required: "Email is required" })} placeholder="john.doe@example.com" />
+              {errors.email && <p className="text-rose-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Password
-              </label>
-
+              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                  {...register("password", { required: "Password is required" })}
                   placeholder="••••••••"
-                  className="w-full border rounded-lg px-3 py-2 pr-10"
+                  className="pr-11"
                 />
-
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="w-5 h-5" />
-                  ) : (
-                    <EyeIcon className="w-5 h-5" />
-                  )}
+                <button type="button" className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 hover:text-slate-600" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                 </button>
               </div>
+              {errors.password && <p className="text-rose-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
-            >
-              {loading ? "Signing In..." : "Sign In"}
+            <button type="submit" disabled={isSubmitting} className="btn-primary w-full">
+              {isSubmitting ? "Signing In..." : "Sign In"}
             </button>
           </form>
-
         </div>
       </div>
     </div>
